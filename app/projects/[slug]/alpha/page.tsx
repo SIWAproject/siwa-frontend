@@ -8,54 +8,23 @@ import SkeletonCard from "@/app/components/skeletoncard";
 import GraphicCard from "@/app/components/graphicCard";
 import { Bounce, toast } from "react-toastify";
 import { renderToStaticMarkup } from "react-dom/server";
-import { GetStaticPaths } from 'next';
 
-
-
-// Tipos para los datos de tu proyecto
-type ProjectData = {
-    slug: string;
-    name: string;
-    description: string;
-  };
-
-  export const getStaticPaths: GetStaticPaths = async () => {
-    // Slugs quemados para propósito de prueba
-    const slugs = ['"E335"', 'E346'];
+// app/projects/[projectId].js
+export async function generateStaticParams() {
+    // Hardcoded project IDs with corresponding slugs
+    const projects = [
+      { id: 'E335', slug: 'E335' },
+      { id: 'E346', slug: 'E346' },
+    ];
   
-    const paths = slugs.map(slug => ({
-      params: { slug },
-    }));
+    // Return an array of objects for each project
+    return projects.map(project => ({ projectId: project.id }));
+  }
+
+
+export default function Page({ params }: { params: any }) {
+    const { projectId } = params;
   
-    return { paths, fallback: false };
-  };
-
-  import { GetStaticProps } from 'next';
-
-export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const slug = params?.slug as string; // Asegurándonos de que slug sea un string
-
-  // Simula la obtención de datos basados en el slug
-  const projectData: ProjectData = { slug, name: `Project for ${slug}`, description: `Description for ${slug}` };
-
-  return {
-    props: {
-      projectData,
-    },
-  };
-};
-
-
-type ProjectPageProps = {
-    projectData: ProjectData;
-  };
-
-export default function Page({ projectData }: ProjectPageProps) {
-    type OtuType = {
-        index: string[];
-        columns: string[];
-        data: number[][];
-    };
 
     const { user, error, isLoading } = useUser();
     const [accessToken, setAccessToken] = useState();
@@ -160,12 +129,12 @@ export default function Page({ projectData }: ProjectPageProps) {
         return () => {
           window.removeEventListener('resize', updatePlotWidth);
         };
-      }, [projectData.slug, plotData]);
+      }, [projectId, plotData]);
 
 
     const fetchConfigFile = async (token: any) => {
         try {
-            const response = await fetch(`http://127.0.0.1:8000/projects/config/${projectData.slug}`, {
+            const response = await fetch(`http://127.0.0.1:8000/projects/config/${projectId}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -187,7 +156,7 @@ export default function Page({ projectData }: ProjectPageProps) {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:8000/projects/alpha-diversity/${projectData.slug}`, {
+                `http://127.0.0.1:8000/projects/alpha-diversity/${projectId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -396,7 +365,7 @@ export default function Page({ projectData }: ProjectPageProps) {
     useEffect(() => {
         const columnIndex = otus?.data?.columns.indexOf(selectedColumn);
         fetchToken().then((token) => { fetchConfigFile(token); fetchData(token, columnIndex).then((result) => { fetchProjectIds(result, columnIndex) }) });
-    }, [projectData.slug]);
+    }, [projectId]);
 
 
     const handleLocationChange = (event: any) => {
@@ -570,7 +539,7 @@ const MyPlotComponent = ({ shannonData, scatterColors }: { shannonData: ShannonD
 
     return (
         <div>
-        <Layout slug={projectData.slug} filter={""} >
+        <Layout slug={projectId} filter={""} >
           {isLoaded ? (
   <div className="flex flex-col w-full">
   
