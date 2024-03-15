@@ -1,0 +1,2 @@
+NEXT_PUBLIC_AUTH0_BASE_URL='http://localhost:3000'
+NEXT_PUBLIC_ENDPOINT_URL='http://s9t-s2a-b5d-m4r-118523452.us-east-1.elb.amazonaws.com'
